@@ -28,9 +28,11 @@ proxy_num = 0
 proxy_https_num = 0
 lock = threading.Lock()
 
-headers = {'Upgrade-Insecure-Requests':'1', 
- 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36', 
- 'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'}
+headers = {
+   'Upgrade-Insecure-Requests':'1', 
+   'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36', 
+   'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'}
+
 cfg_path = 'config.ini'
 
 def yellow():
@@ -62,23 +64,27 @@ def configW():
         "thread_count": thc,
         "ping_server": pser
     }
+    
     with open(cfg_path, "w") as (f):
         config.write(f)
 
 def configC():
     config = ConfigParser()
     config['Groxy'] = {
-     'thread_count':'300',
-     "ping_server": "https://google.com"
+        'thread_count':'300',
+         "ping_server": "https://google.com"
      }
-    with open(cfg_path, 'w') as (f):
+    
+     with open(cfg_path, 'w') as (f):
         config.write(f)
+    
     configR()
 
 
 def configR():
     global thc
     global pser
+    
     try:
         parser = ConfigParser()
         parser.read(cfg_path)
@@ -141,6 +147,7 @@ def main(proxy, proxy_s5, proxy_https):
 
     try:
         check = requests.get(pser, headers=headers, proxies={'https': 'http://%s' % proxy}, timeout=3)
+        
         ff = open("https_proxy.txt", "a")
         ff.write(f"{proxy}\n")
         ff.close()
@@ -150,6 +157,7 @@ def main(proxy, proxy_s5, proxy_https):
         nowtime =  str(f"{now.hour}:{now.minute}:{now.second}")
         sys.stdout.write(f'[{cyan()}{nowtime}{reset()}]=[{green()}+++{reset()}] {cyan()}https://{proxy}{reset()}\n')
         lock.release()
+        
         valid += 1
         retries += 1
     except: 
@@ -158,6 +166,7 @@ def main(proxy, proxy_s5, proxy_https):
 
     try:
         check = requests.get(pser, headers=headers, proxies={'http': 'http://%s' % proxy}, timeout=3)
+        
         ff = open("http_proxy.txt", "a")
         ff.write(f"{proxy}\n")
         ff.close()
@@ -167,6 +176,7 @@ def main(proxy, proxy_s5, proxy_https):
         nowtime =  str(f"{now.hour}:{now.minute}:{now.second}")
         sys.stdout.write(f'[{blue()}{nowtime}{reset()}]=[{green()}+++{reset()}] {cyan()}https://{proxy}{reset()}\n')
         lock.release()
+        
         valid += 1
         retries += 1
     except:
@@ -175,6 +185,7 @@ def main(proxy, proxy_s5, proxy_https):
     
     try:
         check = requests.get(pser, headers=headers, proxies={"socks5": "socks://%s" % proxy_s5}, timeout=3)
+        
         ff = open("socks5_proxy.txt", "a")
         ff.write(f"{proxy}\n")
         ff.close()
@@ -184,6 +195,7 @@ def main(proxy, proxy_s5, proxy_https):
         nowtime =  str(f"{now.hour}:{now.minute}:{now.second}")
         sys.stdout.write(f"[{magenta()}{nowtime}{reset()}]=[{green()}+++{reset()}] {cyan()}socks5://{proxy}{reset()}\n")
         lock.release()
+        
         valid += 1
         retries += 2
     except:
@@ -192,25 +204,26 @@ def main(proxy, proxy_s5, proxy_https):
 
 configR()
 
-try:
-    if platform.system() == 'Windows':
-        os.system('cls')
-        os.system(f'title [Groxy] by 1YablochniK1 ^| V1.0 ^| ~ {thc} ~')
-        os.system('mode CON COLS=65 LINES=30')
-except:
-    pass
-
 threading.Thread(target=grab_proxies).start()
 threading.Thread(target=grab_proxies_s5).start()
 threading.Thread(target=grab_proxies_https).start()
 threading.Thread(target=cpm).start()
+
 sleep(3)
+try:
+    if platform.system() == 'Windows':
+        os.system(f'title [Groxy] by 1YablochniK1 ^| V1.0 ^| ~ {thc} ~')
+except:
+    pass
+
 while threading.active_count() <= thc:
     try:
         threading.Thread(target=main, args=(proxies[proxy_num], proxies_s5[proxy_s5_num], proxies_https[proxy_https_num],)).start()
+        
         proxy_num += 1
         proxy_s5_num += 1
         proxy_https_num += 1
+        
         if proxy_num >= len(proxies):
             proxy_num = 0
         if proxy_s5_num >= len(proxies_s5):
